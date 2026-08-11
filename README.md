@@ -1,9 +1,9 @@
 # 16×16 Cyberpunk — LED matrix art
 
 Pixel art and animation for a 16×16 RGB LED panel (WS2812B / HUB75 / Pixoo /
-etc.) — a Japanese-cyberpunk set plus a Matrix rain loop.
-Each piece is generated from code, so the drawing stays editable and every
-export format is rebuilt from one source of truth.
+etc.) — a Japanese-cyberpunk pair, a Matrix rain loop, and a moonlit
+landscape. Each piece is generated from code, so the drawing stays editable
+and every export format is rebuilt from one source of truth.
 
 ## The pieces
 
@@ -43,9 +43,24 @@ frame and the loop closes with no visible seam. The flicker noise is hashed
 from `(x, y, t)` for the same reason: it repeats with the loop instead of
 popping at the wrap. `matrix16.png` is frame 0, if you want a still.
 
+### Moonlit hills — `generate_moon.py`
+
+A full moon over two rolling hills with a lone tree on the far ridge. Wisps of
+cloud drift across the sky, stars twinkle out of phase with each other, and
+fireflies blink above the ridgeline. 32 frames at 120 ms (3.8 s loop).
+
+![moonlit hills](moon16_anim_preview.gif)
+
+Only one wisp runs at a height that crosses the disc, so the moon is clear for
+half the loop and veiled as that wisp drifts past — a cloud over the moon
+brightens rather than darkens, which is what sells it as thin cloud. Drift is
+one pixel every other frame, carrying a wisp exactly 16 px over the loop so it
+wraps seamlessly. The ridgelines are hand-written per column: at 16 px wide,
+placing each crest by hand beats any curve formula.
+
 ## Files
 
-Each piece `<name>` (`torii16`, `oni16`, `matrix16`) exports the same set:
+Each piece `<name>` (`torii16`, `oni16`, `matrix16`, `moon16`) exports the same set:
 
 | File | What it is |
 | --- | --- |
@@ -94,6 +109,10 @@ serpentine (boustrophedon) layout, reverse every odd row when writing it out.
   palette animation: the geometry stays put and only the meaning of its colors
   changes per frame. The blink is a palette swap too — a 1px-tall eyelid would
   read as noise, so the eyes simply drop to brow-black.
+- Silhouettes need something bright behind them. The tree on the moonlit hills
+  only became visible once the horizon band was lifted and its moon-facing
+  edge was given a rim pixel — black on near-black is just a hole in the
+  panel.
 
 ## Editing
 
@@ -105,4 +124,5 @@ pip install Pillow
 python3 generate_torii.py    # each script also prints its grid as ASCII
 python3 generate_oni.py      # for a quick sanity check in the terminal
 python3 generate_matrix.py
+python3 generate_moon.py
 ```
