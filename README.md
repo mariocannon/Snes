@@ -1,9 +1,9 @@
 # 16×16 Cyberpunk — LED matrix art
 
 Pixel art and animation for a 16×16 RGB LED panel (WS2812B / HUB75 / Pixoo /
-etc.) — a Japanese-cyberpunk pair, a Matrix rain loop, and a moonlit
-landscape. Each piece is generated from code, so the drawing stays editable
-and every export format is rebuilt from one source of truth.
+etc.) — a Japanese-cyberpunk pair, a Matrix rain loop, and two landscapes.
+Each piece is generated from code, so the drawing stays editable and every
+export format is rebuilt from one source of truth.
 
 ## The pieces
 
@@ -58,9 +58,26 @@ one pixel every other frame, carrying a wisp exactly 16 px over the loop so it
 wraps seamlessly. The ridgelines are hand-written per column: at 16 px wide,
 placing each crest by hand beats any curve formula.
 
+### Wooded forest — `generate_forest.py`
+
+Layered trunks receding into a misty gap of light, a dappled canopy overhead,
+and two shafts of sun cutting down between the trees. Motes drift up through
+the beams, the canopy stirs, and a leaf falls the height of the panel each
+loop. 32 frames at 110 ms (3.5 s loop).
+
+![forest](forest16_anim_preview.gif)
+
+Depth comes from two things: near trunks are warm and dark while far ones
+desaturate toward the mist, and the mist itself shades by distance from the
+gap so light falls off in every direction instead of banding by row. The leaf
+texture is hashed on position alone — hashing it on the frame number too made
+the entire canopy boil — so wind is just a handful of pixels stirring a step
+brighter per frame.
+
 ## Files
 
-Each piece `<name>` (`torii16`, `oni16`, `matrix16`, `moon16`) exports the same set:
+Each piece `<name>` (`torii16`, `oni16`, `matrix16`, `moon16`, `forest16`)
+exports the same set:
 
 | File | What it is |
 | --- | --- |
@@ -113,6 +130,9 @@ serpentine (boustrophedon) layout, reverse every odd row when writing it out.
   only became visible once the horizon band was lifted and its moon-facing
   edge was given a rim pixel — black on near-black is just a hole in the
   panel.
+- Shafts of light need width. A one-pixel beam vanishes into the haze it is
+  cutting through, so the forest's are two px wide with a brighter leading
+  edge.
 
 ## Editing
 
@@ -125,4 +145,5 @@ python3 generate_torii.py    # each script also prints its grid as ASCII
 python3 generate_oni.py      # for a quick sanity check in the terminal
 python3 generate_matrix.py
 python3 generate_moon.py
+python3 generate_forest.py
 ```
