@@ -1,6 +1,7 @@
-# 16×16 Japanese Cyberpunk — LED matrix art
+# 16×16 Cyberpunk — LED matrix art
 
-Pixel art drawn for a 16×16 RGB LED panel (WS2812B / HUB75 / Pixoo / etc.).
+Pixel art and animation for a 16×16 RGB LED panel (WS2812B / HUB75 / Pixoo /
+etc.) — a Japanese-cyberpunk set plus a Matrix rain loop.
 Each piece is generated from code, so the drawing stays editable and every
 export format is rebuilt from one source of truth.
 
@@ -27,9 +28,24 @@ sideways, and the oni blinks once per loop.
 
 ![oni animated](oni16_anim_preview.gif)
 
+### Matrix rain — `generate_matrix.py`
+
+Sixteen columns of falling code: a blown-out leader pixel with a green trail
+fading behind it, and the glyph-flicker of characters changing mid-fall.
+32 frames at 80 ms (2.6 s loop).
+
+![matrix rain](matrix16_anim_preview.gif)
+
+This one is procedural — each frame is drawn from the column state at time
+`t` rather than authored pixel by pixel. Column heads travel a 32-row cycle
+at whole rows per frame, so every column is back where it started on the last
+frame and the loop closes with no visible seam. The flicker noise is hashed
+from `(x, y, t)` for the same reason: it repeats with the loop instead of
+popping at the wrap. `matrix16.png` is frame 0, if you want a still.
+
 ## Files
 
-Each piece `<name>` (`torii16`, `oni16`) exports the same set:
+Each piece `<name>` (`torii16`, `oni16`, `matrix16`) exports the same set:
 
 | File | What it is |
 | --- | --- |
@@ -45,7 +61,7 @@ Animated pieces add:
 | `<name>_anim.gif` | The 16×16 loop |
 | `<name>_anim_preview.gif` | 32× blow-up of the loop |
 | `<name>_anim.json` | `frames_rows_hex` plus `frame_count` and `delay_ms` |
-| `<name>_anim.h` | `<name>_anim_rgb888[24][256]`, `<name>_anim_rgb565[24][256]`, and `*_FRAMES` / `*_DELAY_MS` defines |
+| `<name>_anim.h` | `<name>_anim_rgb888[frames][256]`, `<name>_anim_rgb565[frames][256]`, and `*_FRAMES` / `*_DELAY_MS` defines |
 
 On a microcontroller use the RGB565 array and step one frame per
 `*_DELAY_MS`; the RGB888 copy is there for hosts that want the full range.
@@ -70,6 +86,10 @@ serpentine (boustrophedon) layout, reverse every odd row when writing it out.
   from the background.
 - Backgrounds are near-black rather than pure black, which keeps dark areas
   from looking like dead pixels.
+- The rain is the one piece built on brightness alone rather than hue: a
+  single green with a steep 8-step ramp. The first two steps drop hard, since
+  a gentle fade off the leader reads as a fat blur rather than a falling
+  glyph once the panel's gamma gets hold of it.
 - Because the art is a character grid over a palette, animation is mostly
   palette animation: the geometry stays put and only the meaning of its colors
   changes per frame. The blink is a palette swap too — a 1px-tall eyelid would
@@ -82,6 +102,7 @@ regenerated together.
 
 ```sh
 pip install Pillow
-python3 generate_torii.py   # each script also prints its grid as ASCII
-python3 generate_oni.py     # for a quick sanity check in the terminal
+python3 generate_torii.py    # each script also prints its grid as ASCII
+python3 generate_oni.py      # for a quick sanity check in the terminal
+python3 generate_matrix.py
 ```
