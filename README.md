@@ -20,6 +20,13 @@ eyes, and a tusked grin, with magenta and cyan rim lights tracing the jaw.
 
 ![oni](oni16_preview.png)
 
+Animated: 24 frames at 90 ms (2.2 s loop). The glare breathes from steady cyan
+up to a white-hot core and the halo swells with it, the two neon rim lights
+stutter out of phase like failing tubes, a single frame tears the eye rows
+sideways, and the oni blinks once per loop.
+
+![oni animated](oni16_anim_preview.gif)
+
 ## Files
 
 Each piece `<name>` (`torii16`, `oni16`) exports the same set:
@@ -31,9 +38,21 @@ Each piece `<name>` (`torii16`, `oni16`) exports the same set:
 | `<name>.json` | `rows_hex` (16 strings of 16 `RRGGBB`) + `pixels_rgb` nested arrays |
 | `<name>.h` | C header with `<name>_rgb888[256]` and `<name>_rgb565[256]` |
 
+Animated pieces add:
+
+| File | What it is |
+| --- | --- |
+| `<name>_anim.gif` | The 16×16 loop |
+| `<name>_anim_preview.gif` | 32× blow-up of the loop |
+| `<name>_anim.json` | `frames_rows_hex` plus `frame_count` and `delay_ms` |
+| `<name>_anim.h` | `<name>_anim_rgb888[24][256]`, `<name>_anim_rgb565[24][256]`, and `*_FRAMES` / `*_DELAY_MS` defines |
+
+On a microcontroller use the RGB565 array and step one frame per
+`*_DELAY_MS`; the RGB888 copy is there for hosts that want the full range.
+
 `pixelart.py` holds the shared `Canvas` — drawing primitives (`put`, `rect`,
 `disc`, `ring`, `mirror_x`) over a character grid plus a palette, and the
-exporter that writes all four files.
+exporters for both the stills and the animation.
 
 All data is row-major from the top-left pixel. If your panel is wired in a
 serpentine (boustrophedon) layout, reverse every odd row when writing it out.
@@ -51,6 +70,10 @@ serpentine (boustrophedon) layout, reverse every odd row when writing it out.
   from the background.
 - Backgrounds are near-black rather than pure black, which keeps dark areas
   from looking like dead pixels.
+- Because the art is a character grid over a palette, animation is mostly
+  palette animation: the geometry stays put and only the meaning of its colors
+  changes per frame. The blink is a palette swap too — a 1px-tall eyelid would
+  read as noise, so the eyes simply drop to brow-black.
 
 ## Editing
 

@@ -6,9 +6,10 @@ eyes, and a tusked grin. Magenta and cyan rim lights trace the jaw so the
 silhouette survives against a near-black background.
 """
 
+import math
 import os
 
-from pixelart import Canvas
+from pixelart import Canvas, dim, emit_animation, mix, shift_rows
 
 PALETTE = {
     ".": (0x08, 0x05, 0x16),  # background
@@ -29,8 +30,8 @@ PALETTE = {
 }
 
 
-def build():
-    c = Canvas(PALETTE)
+def build(palette=None):
+    c = Canvas(palette or PALETTE)
 
     # --- halo --------------------------------------------------------------
     # A soft ring behind the head; the mask is drawn over most of it, leaving
@@ -86,7 +87,57 @@ def build():
     return c
 
 
+# --- animation --------------------------------------------------------------
+# The art is a character grid over a palette, so most of the motion is palette
+# animation: the geometry never changes, only what its colors mean this frame.
+
+FRAMES = 24
+DELAY_MS = 90
+
+BLINK = (17, 18)        # eyelid down for ~180 ms, once per loop
+GLITCH = 11             # single-frame horizontal tear across the eyes
+MAGENTA_FLICKER = {5: 0.30, 6: 0.05, 7: 0.65}   # bad-ballast stutter, left rim
+CYAN_FLICKER = {14: 0.35, 20: 0.10}             # right rim, deliberately
+#                                                 out of phase with the left
+
+
+def frame_palette(t):
+    pal = dict(PALETTE)
+
+    # Glare: the eyes breathe from a steady cyan up to a white-hot core, and
+    # the halo behind the head swells with them.
+    glow = 0.5 - 0.5 * math.cos(2 * math.pi * t / FRAMES)
+    pal["e"] = mix(PALETTE["e"], PALETTE["E"], 0.35 * glow)
+    pal["E"] = mix(PALETTE["E"], (0xFF, 0xFF, 0xFF), glow)
+    pal[":"] = mix(dim(PALETTE[":"], 0.7), PALETTE[":"], glow)
+
+    # Blink: drop the eyes to brow-black. Cheaper and steadier than redrawing
+    # an eyelid, and at 1px tall an eyelid would read as noise anyway.
+    if t in BLINK:
+        pal["e"] = pal["E"] = mix(PALETTE["k"], PALETTE["d"], 0.35)
+
+    # Neon rims stutter independently, the way two failing tubes would.
+    if t in MAGENTA_FLICKER:
+        pal["p"] = dim(PALETTE["p"], MAGENTA_FLICKER[t])
+    if t in CYAN_FLICKER:
+        pal["q"] = dim(PALETTE["q"], CYAN_FLICKER[t])
+
+    return pal
+
+
+def animate():
+    frames = []
+    for t in range(FRAMES):
+        px = build(frame_palette(t)).pixels()
+        if t == GLITCH:
+            px = shift_rows(px, range(6, 9), 1)
+        frames.append(px)
+    return frames
+
+
 if __name__ == "__main__":
+    here = os.path.dirname(os.path.abspath(__file__))
     canvas = build()
-    canvas.emit("oni16", os.path.dirname(os.path.abspath(__file__)))
+    canvas.emit("oni16", here)
+    emit_animation("oni16", animate(), here, delay_ms=DELAY_MS)
     print(canvas.ascii_art())

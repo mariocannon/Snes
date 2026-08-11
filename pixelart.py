@@ -12,6 +12,26 @@ import os
 from PIL import Image, ImageDraw
 
 
+def mix(a, b, t):
+    """Blend two RGB triples; t=0 gives a, t=1 gives b."""
+    t = max(0.0, min(1.0, t))
+    return tuple(int(round(a[i] + (b[i] - a[i]) * t)) for i in range(3))
+
+
+def dim(c, f):
+    return tuple(max(0, min(255, int(round(v * f)))) for v in c)
+
+
+def shift_rows(px, rows, dx):
+    """Slide the given rows sideways, for one-frame glitch tears."""
+    out = [list(r) for r in px]
+    w = len(px[0])
+    for y in rows:
+        if 0 <= y < len(px):
+            out[y] = [px[y][(x - dx) % w] for x in range(w)]
+    return out
+
+
 class Canvas:
     def __init__(self, palette, width=16, height=16, bg="."):
         self.palette = palette
@@ -93,10 +113,6 @@ class Canvas:
                 indent=2,
             )
 
-        def rgb565(p):
-            r, g, b = p
-            return ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3)
-
         n = self.w * self.h
         out = [
             "// %dx%d LED-matrix art. Row-major, top-left origin." % (self.w, self.h),
@@ -115,3 +131,93 @@ class Canvas:
         out += ["};", ""]
         with open(path(".h"), "w") as f:
             f.write("\n".join(out))
+
+
+def rgb565(p):
+    r, g, b = p
+    return ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3)
+
+
+def emit_animation(name, frames, outdir=".", delay_ms=100, scale=32):
+    """Write <name>_anim{.gif,_preview.gif,.json,.h} for a list of frames.
+
+    Each frame is a pixel matrix: rows of (r, g, b) tuples, as produced by
+    Canvas.pixels().
+    """
+    h = len(frames[0])
+    w = len(frames[0][0])
+    base = os.path.join(outdir, name + "_anim")
+
+    def to_image(px, s=1):
+        im = Image.new("RGB", (w, h))
+        im.putdata([px[y][x] for y in range(h) for x in range(w)])
+        return im.resize((w * s, h * s), Image.NEAREST) if s > 1 else im
+
+    def save_gif(path_, s):
+        # Per-frame adaptive palettes: the glow ramps introduce more distinct
+        # colors across the loop than a single 256-entry GIF palette holds
+        # comfortably, and each individual frame uses only a handful.
+        imgs = [to_image(f, s).convert("P", palette=Image.ADAPTIVE) for f in frames]
+        imgs[0].save(
+            path_,
+            save_all=True,
+            append_images=imgs[1:],
+            duration=delay_ms,
+            loop=0,
+            disposal=2,
+            optimize=False,
+        )
+
+    save_gif(base + ".gif", 1)
+    save_gif(base + "_preview.gif", scale)
+
+    with open(base + ".json", "w") as f:
+        json.dump(
+            {
+                "width": w,
+                "height": h,
+                "frame_count": len(frames),
+                "delay_ms": delay_ms,
+                "order": "row-major, top-left origin",
+                "frames_rows_hex": [
+                    ["".join("%02X%02X%02X" % p for p in r) for r in fr]
+                    for fr in frames
+                ],
+            },
+            f,
+            indent=2,
+        )
+
+    n = w * h
+    up = name.upper()
+    out = [
+        "// %dx%d LED-matrix animation, %d frames at %d ms."
+        % (w, h, len(frames), delay_ms),
+        "// Row-major, top-left origin. Generated -- do not edit by hand.",
+        "#pragma once",
+        "#include <stdint.h>",
+        "",
+        "#define %s_ANIM_W %d" % (up, w),
+        "#define %s_ANIM_H %d" % (up, h),
+        "#define %s_ANIM_FRAMES %d" % (up, len(frames)),
+        "#define %s_ANIM_DELAY_MS %d" % (up, delay_ms),
+        "",
+        "static const uint32_t %s_anim_rgb888[%d][%d] = {"
+        % (name, len(frames), n),
+    ]
+    for fr in frames:
+        out.append("    {")
+        out += ["        " + " ".join("0x%02X%02X%02X," % p for p in r) for r in fr]
+        out.append("    },")
+    out += [
+        "};",
+        "",
+        "static const uint16_t %s_anim_rgb565[%d][%d] = {" % (name, len(frames), n),
+    ]
+    for fr in frames:
+        out.append("    {")
+        out += ["        " + " ".join("0x%04X," % rgb565(p) for p in r) for r in fr]
+        out.append("    },")
+    out += ["};", ""]
+    with open(base + ".h", "w") as f:
+        f.write("\n".join(out))
