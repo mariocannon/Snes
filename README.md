@@ -2,7 +2,7 @@
 
 Pixel art and animation for a 16×16 RGB LED panel (WS2812B / HUB75 / Pixoo /
 etc.) — a Japanese-cyberpunk pair, a Matrix rain loop, two landscapes,
-and the Eye of Sauron.
+the Eye of Sauron, and a colour-cycling TIE fighter.
 Each piece is generated from code, so the drawing stays editable and every
 export format is rebuilt from one source of truth.
 
@@ -89,10 +89,27 @@ The pupil is a single pixel wide with white-hot flanks across the middle
 rows only: two pixels of black swallowed the eye, and flanking its full
 height turned the iris into a bright capsule.
 
+### TIE fighter — `generate_tie.py`
+
+A TIE silhouette cycling through the spectrum: 32 frames at 110 ms (3.5 s
+loop), one full turn of the colour wheel.
+
+![tie fighter](tie16_anim_preview.gif)
+
+The most literal palette animation in the set — the geometry never changes at
+all. Every frame draws the same mask and only rotates the hue, so the hull,
+its rim light, the wing spars and the backglow all stay in step because they
+are derived from one hue value per frame.
+
+A TIE is the Star Wars shape that survives 16 px: two slab wings and a ball,
+all straight lines and hard corners. A Vader helmet was the first attempt and
+had to be abandoned — at this size the dome, lenses and grille collapse into a
+generic face.
+
 ## Files
 
 Each piece `<name>` (`torii16`, `oni16`, `matrix16`, `moon16`, `forest16`,
-`eye16`) exports the same set:
+`eye16`, `tie16`) exports the same set:
 
 | File | What it is |
 | --- | --- |
@@ -151,6 +168,9 @@ serpentine (boustrophedon) layout, reverse every odd row when writing it out.
 - Fire is the one place per-pixel noise should re-roll every frame. The same
   trick that ruined the forest canopy is exactly what makes the Eye's rim
   read as flame.
+- A flat single-colour silhouette needs a rim light along one edge or it has
+  no form at all. One edge — running it down the side as well just puts a
+  stripe through the shape.
 
 ## Editing
 
@@ -165,4 +185,5 @@ python3 generate_matrix.py
 python3 generate_moon.py
 python3 generate_forest.py
 python3 generate_eye.py
+python3 generate_tie.py
 ```
