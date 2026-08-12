@@ -2,7 +2,7 @@
 
 Pixel art and animation for a 16×16 RGB LED panel (WS2812B / HUB75 / Pixoo /
 etc.) — a Japanese-cyberpunk pair, a Matrix rain loop, two landscapes,
-the Eye of Sauron, a colour-cycling TIE fighter, a 30-second skull, and a scrolling name banner.
+the Eye of Sauron, a colour-cycling TIE fighter, a 30-second skull, and a scrolling name-and-sunset banner.
 Each piece is generated from code, so the drawing stays editable and every
 export format is rebuilt from one source of truth.
 
@@ -134,11 +134,13 @@ Long animations skip the RGB888 array in the header — at 250 frames it
 doubles a file no microcontroller would play from anyway. `skull16_anim.h`
 is 535 KB with RGB565 alone.
 
-### Scrolling name — `generate_name.py`
+### Scrolling name and sunset — `generate_name.py`
 
-“THEA & ROMA” scrolling right to left in chunky geometric caps: pink body,
-white inline, deeper pink edge behind, on baby blue. 109 frames at 90 ms
-(9.8 s per pass).
+“THEA & ROMA” scrolling right to left in chunky geometric caps — pink body,
+white inline, deeper pink edge behind, on baby blue — and then, once the name
+has passed, the sky turns and a sunset flows by: gradient sky, a sun sitting
+on the horizon, silhouette hills, palms and birds, before fading back to baby
+blue for the loop. 231 frames at 90 ms (20.8 s per pass).
 
 ![name banner](name16_anim_preview.gif)
 
@@ -147,10 +149,18 @@ animation (`name16_strip.png`, not a panel file):
 
 ![name strip](name16_strip_preview.png)
 
-The text is laid out once as a 109 px strip and each frame is a 16 px window
-sliding along it and wrapping, so the scroll is seamless by construction and
-the loop is exactly as long as the strip is wide. Change `TEXT` and the frame
-count follows automatically.
+The whole banner is laid out once as a 231 px strip and each frame is a 16 px
+window sliding along it and wrapping, so the scroll is seamless by
+construction and the loop is exactly as long as the strip is wide. Change
+`TEXT` and the frame count follows automatically.
+
+The strip is built in RGB rather than palette characters, because the sky
+gradients in two directions at once: down the rows from night purple to gold,
+and across the columns as baby blue turns into sunset and back. The land, the
+palms and the birds are all one flat colour — a silhouette needs no shading,
+only a sky bright enough behind it. The ridge runs flat for the first and
+last few columns so the land slides into frame from below rather than
+appearing mid-air.
 
 Every glyph is drawn with 2px strokes, which is what gives the inline pass an
 interior to paint: a pixel is white unless it sits on a top or left edge, so
