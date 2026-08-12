@@ -3,7 +3,7 @@
 Pixel art and animation for a 16×16 RGB LED panel (WS2812B / HUB75 / Pixoo /
 etc.) — a Japanese-cyberpunk pair, a Matrix rain loop, two landscapes,
 the Eye of Sauron, a colour-cycling TIE fighter, a 30-second skull, a scrolling name-and-sunset banner, a
-two-minute samurai saga, and a candlelit lantern.
+two-minute samurai saga, and two lanterns.
 Each piece is generated from code, so the drawing stays editable and every
 export format is rebuilt from one source of truth.
 
@@ -217,11 +217,31 @@ This is the one piece on pure black rather than near-black. It works here
 because the halo does the work: the spill on the surrounding pixels breathes
 with the flame, so the panel never looks switched off.
 
+### Stone lantern — `generate_toro.py`
+
+An ishidoro standing in a garden at night: hoju finial, curved kasa roof with
+its eaves turned up at the corners, a round moon window cut through the
+firebox, then platform, post and base, with moss at the foot and grass either
+side. 80 frames at 100 ms (8.0 s loop).
+
+![stone lantern](toro16_anim_preview.gif)
+
+Where the paper lantern *is* the light, this one is only lit by it — so the
+piece is built the other way round. Every pixel is drawn in its own stone,
+moss or earth colour first, and a second pass warms each one by how close it
+sits to the firebox. Surfaces below the window take more of it than those
+above, because the roof caps the light: that asymmetry is what makes a heavy
+grey object read as lit from inside rather than merely tinted orange.
+
+The window started as a plain rectangle and read as a flat amber slab. Cutting
+it round — the moon window these lanterns actually carry — fixed it at no cost
+in pixels.
+
 ## Files
 
 Each piece `<name>` (`torii16`, `oni16`, `matrix16`, `moon16`, `forest16`,
-`eye16`, `tie16`, `skull16`, `name16`, `saga16`, `lantern16`) exports the
-same set:
+`eye16`, `tie16`, `skull16`, `name16`, `saga16`, `lantern16`, `toro16`)
+exports the same set:
 
 | File | What it is |
 | --- | --- |
@@ -346,5 +366,6 @@ python3 generate_skull.py
 python3 generate_name.py
 python3 generate_saga.py    # ~2 min of frames, takes a moment
 python3 generate_lantern.py
+python3 generate_toro.py
 python3 generate_probe.py   # panel calibration pattern
 ```
