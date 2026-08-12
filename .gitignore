@@ -1,3 +1,6 @@
 __pycache__/
 *.pyc
+
+# panelfit.py output: derived per-panel files, regenerate as needed
 panel/
+panel_*/
