@@ -1,7 +1,8 @@
 # 16×16 Cyberpunk — LED matrix art
 
 Pixel art and animation for a 16×16 RGB LED panel (WS2812B / HUB75 / Pixoo /
-etc.) — a Japanese-cyberpunk pair, a Matrix rain loop, and two landscapes.
+etc.) — a Japanese-cyberpunk pair, a Matrix rain loop, two landscapes,
+and the Eye of Sauron.
 Each piece is generated from code, so the drawing stays editable and every
 export format is rebuilt from one source of truth.
 
@@ -74,10 +75,24 @@ texture is hashed on position alone — hashing it on the frame number too made
 the entire canopy boil — so wind is just a handful of pixels stirring a step
 brighter per frame.
 
+### The Eye — `generate_eye.py`
+
+The lidless eye wreathed in flame above the dark spire of Barad-dûr. Fire
+licks around the rim, the glow behind it swells, and the slit pupil sweeps
+left and right, searching. 24 frames at 100 ms (2.4 s loop).
+
+![the eye](eye16_anim_preview.gif)
+
+The eye is a lens — the overlap of two circles — rather than an ellipse,
+which is what gives it points at the corners instead of reading as a blob.
+The pupil is a single pixel wide with white-hot flanks across the middle
+rows only: two pixels of black swallowed the eye, and flanking its full
+height turned the iris into a bright capsule.
+
 ## Files
 
-Each piece `<name>` (`torii16`, `oni16`, `matrix16`, `moon16`, `forest16`)
-exports the same set:
+Each piece `<name>` (`torii16`, `oni16`, `matrix16`, `moon16`, `forest16`,
+`eye16`) exports the same set:
 
 | File | What it is |
 | --- | --- |
@@ -133,6 +148,9 @@ serpentine (boustrophedon) layout, reverse every odd row when writing it out.
 - Shafts of light need width. A one-pixel beam vanishes into the haze it is
   cutting through, so the forest's are two px wide with a brighter leading
   edge.
+- Fire is the one place per-pixel noise should re-roll every frame. The same
+  trick that ruined the forest canopy is exactly what makes the Eye's rim
+  read as flame.
 
 ## Editing
 
@@ -146,4 +164,5 @@ python3 generate_oni.py      # for a quick sanity check in the terminal
 python3 generate_matrix.py
 python3 generate_moon.py
 python3 generate_forest.py
+python3 generate_eye.py
 ```
