@@ -138,12 +138,19 @@ def rgb565(p):
     return ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3)
 
 
-def emit_animation(name, frames, outdir=".", delay_ms=100, scale=32):
+def emit_animation(name, frames, outdir=".", delay_ms=100, scale=32,
+                   include_rgb888=None):
     """Write <name>_anim{.gif,_preview.gif,.json,.h} for a list of frames.
 
     Each frame is a pixel matrix: rows of (r, g, b) tuples, as produced by
     Canvas.pixels().
+
+    include_rgb888 defaults to dropping the 32-bit array on long animations:
+    past a few dozen frames it doubles a header that an MCU cannot use anyway,
+    since anything of that length is played from the RGB565 copy.
     """
+    if include_rgb888 is None:
+        include_rgb888 = len(frames) <= 64
     h = len(frames[0])
     w = len(frames[0][0])
     base = os.path.join(outdir, name + "_anim")
@@ -202,18 +209,22 @@ def emit_animation(name, frames, outdir=".", delay_ms=100, scale=32):
         "#define %s_ANIM_FRAMES %d" % (up, len(frames)),
         "#define %s_ANIM_DELAY_MS %d" % (up, delay_ms),
         "",
-        "static const uint32_t %s_anim_rgb888[%d][%d] = {"
-        % (name, len(frames), n),
     ]
-    for fr in frames:
-        out.append("    {")
-        out += ["        " + " ".join("0x%02X%02X%02X," % p for p in r) for r in fr]
-        out.append("    },")
-    out += [
-        "};",
-        "",
-        "static const uint16_t %s_anim_rgb565[%d][%d] = {" % (name, len(frames), n),
-    ]
+    if include_rgb888:
+        out.append(
+            "static const uint32_t %s_anim_rgb888[%d][%d] = {" % (name, len(frames), n)
+        )
+        for fr in frames:
+            out.append("    {")
+            out += ["        " + " ".join("0x%02X%02X%02X," % p for p in r) for r in fr]
+            out.append("    },")
+        out += ["};", ""]
+    else:
+        out += ["// RGB888 array omitted: %d frames. Play from the RGB565 copy."
+                % len(frames), ""]
+    out.append(
+        "static const uint16_t %s_anim_rgb565[%d][%d] = {" % (name, len(frames), n)
+    )
     for fr in frames:
         out.append("    {")
         out += ["        " + " ".join("0x%04X," % rgb565(p) for p in r) for r in fr]

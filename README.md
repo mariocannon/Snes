@@ -2,7 +2,7 @@
 
 Pixel art and animation for a 16×16 RGB LED panel (WS2812B / HUB75 / Pixoo /
 etc.) — a Japanese-cyberpunk pair, a Matrix rain loop, two landscapes,
-the Eye of Sauron, and a colour-cycling TIE fighter.
+the Eye of Sauron, a colour-cycling TIE fighter, and a 30-second skull.
 Each piece is generated from code, so the drawing stays editable and every
 export format is rebuilt from one source of truth.
 
@@ -106,10 +106,38 @@ all straight lines and hard corners. A Vader helmet was the first attempt and
 had to be abandoned — at this size the dome, lenses and grille collapse into a
 generic face.
 
+### Skull — `generate_skull.py`
+
+Thirty seconds in four movements: the skull sweeps twice round the colour
+wheel, then matrix rain falls through it and every pixel the rain touches
+stops being skull and drops away as code; a stretch of rain alone; then a
+second sweep with the skull re-forming in its wake. 250 frames at 120 ms —
+30.00 s exactly.
+
+![skull](skull16_anim_preview.gif)
+
+| Time | What happens |
+| --- | --- |
+| 0.0 – 18.0 s | Skull, two full turns of the colour wheel |
+| 18.0 – 22.8 s | Rain sweeps down, dissolving the skull as it passes |
+| 22.8 – 25.2 s | Rain only |
+| 25.2 – 30.0 s | Second sweep, skull re-forming behind it |
+
+The rebuild is what makes it loop: the last frame lands on the first, so it
+runs forever without a seam. The dissolving sweep trails its tail *behind*
+the head, covering what it just erased; the rebuilding sweep trails *ahead*
+of the head instead, so the code reads as being consumed into the skull
+rather than painted over it. Rain fades out over the final twelve frames, or
+it would pop at the wrap.
+
+Long animations skip the RGB888 array in the header — at 250 frames it
+doubles a file no microcontroller would play from anyway. `skull16_anim.h`
+is 535 KB with RGB565 alone.
+
 ## Files
 
 Each piece `<name>` (`torii16`, `oni16`, `matrix16`, `moon16`, `forest16`,
-`eye16`, `tie16`) exports the same set:
+`eye16`, `tie16`, `skull16`) exports the same set:
 
 | File | What it is |
 | --- | --- |
@@ -125,7 +153,7 @@ Animated pieces add:
 | `<name>_anim.gif` | The 16×16 loop |
 | `<name>_anim_preview.gif` | 32× blow-up of the loop |
 | `<name>_anim.json` | `frames_rows_hex` plus `frame_count` and `delay_ms` |
-| `<name>_anim.h` | `<name>_anim_rgb888[frames][256]`, `<name>_anim_rgb565[frames][256]`, and `*_FRAMES` / `*_DELAY_MS` defines |
+| `<name>_anim.h` | `<name>_anim_rgb888[frames][256]`, `<name>_anim_rgb565[frames][256]`, and `*_FRAMES` / `*_DELAY_MS` defines. Past 64 frames the RGB888 array is omitted |
 
 On a microcontroller use the RGB565 array and step one frame per
 `*_DELAY_MS`; the RGB888 copy is there for hosts that want the full range.
@@ -223,5 +251,6 @@ python3 generate_moon.py
 python3 generate_forest.py
 python3 generate_eye.py
 python3 generate_tie.py
+python3 generate_skull.py
 python3 generate_probe.py   # panel calibration pattern
 ```
