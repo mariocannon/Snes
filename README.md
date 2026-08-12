@@ -134,8 +134,45 @@ On a microcontroller use the RGB565 array and step one frame per
 `disc`, `ring`, `mirror_x`) over a character grid plus a palette, and the
 exporters for both the stills and the animation.
 
-All data is row-major from the top-left pixel. If your panel is wired in a
-serpentine (boustrophedon) layout, reverse every odd row when writing it out.
+All data is row-major from the top-left pixel.
+
+## Fitting it to your panel
+
+Every file here is genuinely 16×16 — `file tie16.png` reports `16 x 16`, and
+the PNGs carry no DPI metadata, so anything that displays them larger is
+scaling them for viewing. Panels still disagree about *order*: some start from
+another corner, some are rotated, and most DIY 16×16 boards are wired
+serpentine, where every other row runs backwards.
+
+To find out which, display `probe16.png` (`generate_probe.py`) — a pattern
+where no rotation, flip or wiring order produces the same picture as any
+other:
+
+![probe](probe16_preview.png)
+
+| What you see | What it means |
+| --- | --- |
+| White block somewhere other than top-left | That corner is the origin; the corner colours tell you which rotation or flip |
+| Arrow points down or sideways | Rotation |
+| Arrow mirrored but corners correct | A flip, not a rotation |
+| Diagonal is a zigzag, rows shuffled | Serpentine wiring |
+| Pattern is cropped or fills oddly | Whatever loads the file is scaling it, not the file itself |
+
+Then bake the correction in with `panelfit.py`:
+
+```sh
+python3 panelfit.py tie16 --serpentine
+python3 panelfit.py moon16 --rotate 180 --flip-x
+python3 panelfit.py eye16 --serpentine --rotate 90 --out panel
+```
+
+It writes `<name>_fit.png` (and `_fit.gif` for animated pieces) plus raw
+binaries — RGB888 at 3 bytes per pixel and RGB565 at 2 bytes big-endian,
+frames concatenated — for setups that want to push bytes straight at a strip.
+
+One shortcut: the TIE fighter is mirror-symmetric, every row a palindrome, so
+serpentine wiring cannot scramble it. If *that* piece looks wrong on your
+panel, the cause is rotation, cropping or scaling, not row order.
 
 ## Design notes for LED panels
 
@@ -186,4 +223,5 @@ python3 generate_moon.py
 python3 generate_forest.py
 python3 generate_eye.py
 python3 generate_tie.py
+python3 generate_probe.py   # panel calibration pattern
 ```
