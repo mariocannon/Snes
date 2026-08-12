@@ -2,7 +2,8 @@
 
 Pixel art and animation for a 16×16 RGB LED panel (WS2812B / HUB75 / Pixoo /
 etc.) — a Japanese-cyberpunk pair, a Matrix rain loop, two landscapes,
-the Eye of Sauron, a colour-cycling TIE fighter, a 30-second skull, and a scrolling name-and-sunset banner.
+the Eye of Sauron, a colour-cycling TIE fighter, a 30-second skull, a scrolling name-and-sunset banner, and a
+two-minute samurai saga.
 Each piece is generated from code, so the drawing stays editable and every
 export format is rebuilt from one source of truth.
 
@@ -168,10 +169,39 @@ each stroke comes out pink on the outside and white through the middle. The
 ampersand is wider than the letters — at 9 columns it collapsed into a blob,
 and its tail needs room to swing clear.
 
+### Saga — `generate_saga.py`
+
+Two minutes in medieval Japan: a skeleton raised into a samurai by purple
+magic, then fire. 1000 frames at 120 ms — 120.00 s exactly, looping.
+
+![saga](saga16_anim_preview.gif)
+
+| Time | Movement |
+| --- | --- |
+| 0 – 15 s | Castle keeps on the ridge under a cold moon |
+| 15 – 34 s | A skeleton rises out of the ground, sockets lighting violet |
+| 34 – 60 s | Purple magic spirals in, the orbit tightening as it goes |
+| 60 – 75 s | The vortex closes, a white flash, and a samurai stands there |
+| 75 – 97 s | Fire erupts; he steps aside as it takes hold |
+| 97 – 112 s | The keep burning, the samurai before it |
+| 112 – 120 s | Fire dies, night returns, and the loop closes |
+
+The magic orbits on a tilted ellipse drawn in two passes — once before the
+figure and once after — with the sign of `sin(angle)` deciding which pass a
+mote belongs to, so half the swirl passes behind the body. The flash at the
+midpoint is what covers the swap from bones to armour. Keeps stay flat dark
+silhouettes with only their rooflines taking the firelight: washing the whole
+body in glow made them vanish into a red sky, and since the samurai's armour
+is dark too, he walks out of centre frame as the fire rises so the two never
+overlap.
+
+At 1000 frames this is the largest piece here — 2.1 MB of C header, 463 KB of
+GIF.
+
 ## Files
 
 Each piece `<name>` (`torii16`, `oni16`, `matrix16`, `moon16`, `forest16`,
-`eye16`, `tie16`, `skull16`, `name16`) exports the same set:
+`eye16`, `tie16`, `skull16`, `name16`, `saga16`) exports the same set:
 
 | File | What it is |
 | --- | --- |
@@ -267,6 +297,13 @@ panel, the cause is rotation, cropping or scaling, not row order.
 - Fire is the one place per-pixel noise should re-roll every frame. The same
   trick that ruined the forest canopy is exactly what makes the Eye's rim
   read as flame.
+- Fire reads as fire only if its base tops out at orange with flecks of gold.
+  Letting the hottest rows run to near-white turned the bottom of the saga
+  into a sand bar.
+- Keep animation delays a multiple of 10 ms. GIF stores them in hundredths of
+  a second, so a 125 ms delay silently becomes 120 ms and the file plays at a
+  different length than the exported arrays claim — five seconds adrift over
+  a two-minute piece.
 - A flat single-colour silhouette needs a rim light along one edge or it has
   no form at all. One edge — running it down the side as well just puts a
   stripe through the shape.
@@ -287,5 +324,6 @@ python3 generate_eye.py
 python3 generate_tie.py
 python3 generate_skull.py
 python3 generate_name.py
+python3 generate_saga.py    # ~2 min of frames, takes a moment
 python3 generate_probe.py   # panel calibration pattern
 ```
