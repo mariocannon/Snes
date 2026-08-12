@@ -2,8 +2,8 @@
 
 Pixel art and animation for a 16×16 RGB LED panel (WS2812B / HUB75 / Pixoo /
 etc.) — a Japanese-cyberpunk pair, a Matrix rain loop, two landscapes,
-the Eye of Sauron, a colour-cycling TIE fighter, a 30-second skull, a scrolling name-and-sunset banner, and a
-two-minute samurai saga.
+the Eye of Sauron, a colour-cycling TIE fighter, a 30-second skull, a scrolling name-and-sunset banner, a
+two-minute samurai saga, and a candlelit lantern.
 Each piece is generated from code, so the drawing stays editable and every
 export format is rebuilt from one source of truth.
 
@@ -198,10 +198,30 @@ overlap.
 At 1000 frames this is the largest piece here — 2.1 MB of C header, 463 KB of
 GIF.
 
+### Lantern — `generate_lantern.py`
+
+A chochin hanging on black: dark caps, ribbed paper, a kanji brushed across
+the middle, a tassel below, and a dim orange candle guttering inside.
+96 frames at 90 ms (8.64 s loop).
+
+![lantern](lantern16_anim_preview.gif)
+
+The flicker is the whole piece. It is built from four sines whose cycle counts
+over the loop are whole numbers (3, 7, 13, 23), which reads as irregular — no
+two frames alike — while returning exactly to its starting value at the wrap.
+Two hand-placed gutters dip it further at uneven intervals, and the flame
+leans about half a pixel as it burns, so the glow moves instead of just
+dimming like a lamp on a dial.
+
+This is the one piece on pure black rather than near-black. It works here
+because the halo does the work: the spill on the surrounding pixels breathes
+with the flame, so the panel never looks switched off.
+
 ## Files
 
 Each piece `<name>` (`torii16`, `oni16`, `matrix16`, `moon16`, `forest16`,
-`eye16`, `tie16`, `skull16`, `name16`, `saga16`) exports the same set:
+`eye16`, `tie16`, `skull16`, `name16`, `saga16`, `lantern16`) exports the
+same set:
 
 | File | What it is |
 | --- | --- |
@@ -325,5 +345,6 @@ python3 generate_tie.py
 python3 generate_skull.py
 python3 generate_name.py
 python3 generate_saga.py    # ~2 min of frames, takes a moment
+python3 generate_lantern.py
 python3 generate_probe.py   # panel calibration pattern
 ```
