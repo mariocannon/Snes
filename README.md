@@ -2,7 +2,7 @@
 
 Pixel art and animation for a 16×16 RGB LED panel (WS2812B / HUB75 / Pixoo /
 etc.) — a Japanese-cyberpunk pair, a Matrix rain loop, two landscapes,
-the Eye of Sauron, a colour-cycling TIE fighter, and a 30-second skull.
+the Eye of Sauron, a colour-cycling TIE fighter, a 30-second skull, and a scrolling name banner.
 Each piece is generated from code, so the drawing stays editable and every
 export format is rebuilt from one source of truth.
 
@@ -134,10 +134,29 @@ Long animations skip the RGB888 array in the header — at 250 frames it
 doubles a file no microcontroller would play from anyway. `skull16_anim.h`
 is 535 KB with RGB565 alone.
 
+### Scrolling name — `generate_name.py`
+
+“THEA & ROMA” scrolling right to left in chunky geometric caps: pink body,
+white inline, deeper pink edge behind, on baby blue. 109 frames at 90 ms
+(9.8 s per pass).
+
+![name banner](name16_anim_preview.gif)
+
+The text is laid out once as a 109 px strip and each frame is a 16 px window
+sliding along it and wrapping, so the scroll is seamless by construction and
+the loop is exactly as long as the strip is wide. Change `TEXT` and the frame
+count follows automatically.
+
+Every glyph is drawn with 2px strokes, which is what gives the inline pass an
+interior to paint: a pixel is white unless it sits on a top or left edge, so
+each stroke comes out pink on the outside and white through the middle. The
+ampersand is wider than the letters — at 9 columns it collapsed into a blob,
+and its tail needs room to swing clear.
+
 ## Files
 
 Each piece `<name>` (`torii16`, `oni16`, `matrix16`, `moon16`, `forest16`,
-`eye16`, `tie16`, `skull16`) exports the same set:
+`eye16`, `tie16`, `skull16`, `name16`) exports the same set:
 
 | File | What it is |
 | --- | --- |
@@ -252,5 +271,6 @@ python3 generate_forest.py
 python3 generate_eye.py
 python3 generate_tie.py
 python3 generate_skull.py
+python3 generate_name.py
 python3 generate_probe.py   # panel calibration pattern
 ```
