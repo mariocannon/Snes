@@ -142,6 +142,11 @@ white inline, deeper pink edge behind, on baby blue. 109 frames at 90 ms
 
 ![name banner](name16_anim_preview.gif)
 
+The whole strip, for checking letterforms and spacing without scrubbing the
+animation (`name16_strip.png`, not a panel file):
+
+![name strip](name16_strip_preview.png)
+
 The text is laid out once as a 109 px strip and each frame is a 16 px window
 sliding along it and wrapping, so the scroll is seamless by construction and
 the loop is exactly as long as the strip is wide. Change `TEXT` and the frame

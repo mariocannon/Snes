@@ -187,6 +187,16 @@ if __name__ == "__main__":
             still.put(x, y, strip[y][x])
     still.emit("name16", here)
 
+    # The whole banner in one image -- not a panel file, but the only way to
+    # check letterforms and spacing without scrubbing the animation.
+    from PIL import Image
+    width = len(strip[0])
+    banner = Image.new("RGB", (width, H))
+    banner.putdata([PALETTE[strip[y][x]] for y in range(H) for x in range(width)])
+    banner.save(os.path.join(here, "name16_strip.png"))
+    banner.resize((width * 8, H * 8), Image.NEAREST).save(
+        os.path.join(here, "name16_strip_preview.png"))
+
     print("strip %d px wide -> %d frames at %d ms = %.1fs"
           % (len(strip[0]), len(frames), DELAY_MS, len(frames) * DELAY_MS / 1000))
     print("\n".join("".join(r) for r in strip))
